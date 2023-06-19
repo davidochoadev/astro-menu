@@ -6,18 +6,26 @@ export const getNotionItems = async (options: ClientOptions) => {
   const notion = new Client(options);
 
   const response = await notion.databases.query({
-    database_id: import.meta.env.DATABASE_ID,
+    database_id: import.meta.env.NOTION_DATABASE,
+  });
+
+  return response.results.filter((page) => 'properties' in page);
+};
+
+export const getNotionProperties = async (options: ClientOptions) => {
+  const notion = new Client(options);
+
+  const response = await notion.databases.query({
+    database_id: import.meta.env.NOTION_DATABASE,
+    filter: {
+      property: "Public",
+      checkbox: {
+        equals: true
+      }
+    },
   });
 
   return response.results
-    .map((page) => {
-      if ('properties' in page) {
-        const title = page.properties.Title;
-        if (title && 'type' in title && title.type === 'title') {
-          return title.title[0];
-        }
-      }
-      return false;
-    })
-    .filter((title): title is RichTextItemResponse => !!title);
-};
+  .filter((page) => 'properties' in page)
+  .map((page) => page);
+}
