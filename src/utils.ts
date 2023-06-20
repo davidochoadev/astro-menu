@@ -13,6 +13,7 @@ export const getNotionItems = async (options: ClientOptions) => {
 };
 
 export const getNotionProperties = async (options: ClientOptions) => {
+  console.log("Getting Notion");
   const notion = new Client(options);
 
   const response = await notion.databases.query({
