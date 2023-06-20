@@ -1,21 +1,11 @@
 ---
+import { NotionMenu } from '../components/NotionMenu';
 import Layout from '../layouts/Layout.astro';
 import { getNotionProperties } from '../utils';
-
-/* const notionItems = await getNotionItems({
-	auth: import.meta.env.NOTION_API_KEY
-}); */
 
 const notionRecipe = await getNotionProperties({
 	auth: import.meta.env.NOTION_API_KEY
 });
-
-/* const items = await Promise.all(
-	notionItems.map(async ({ properties } : any) => {
-		const title = properties.Title.title[0].plain_text;
-		return {title};
-	})
-); */
 
 const recipe = await Promise.all(
 	notionRecipe.map(async ({ properties }: any) => {
@@ -85,5 +75,7 @@ const recipe = await Promise.all(
 				))
 			}
 		</div>
+		<hr />
+		<NotionMenu client:load/>
 	</main>
 </Layout>
