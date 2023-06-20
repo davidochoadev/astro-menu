@@ -8,5 +8,11 @@ import cloudflare from "@astrojs/cloudflare";
 export default defineConfig({
   integrations: [tailwind(), react()],
   output: "server",
-  adapter: cloudflare({ mode: "directory" })
+  adapter: cloudflare({ mode: "directory" }),
+  vite: {
+    define: {
+      'process.env.NOTION_API_KEY': JSON.stringify(process.env.NOTION_API_KEY),
+      'process.env.NOTION_DATABASE': JSON.stringify(process.env.NOTION_DATABASE)
+    }
+  }
 });
