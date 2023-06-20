@@ -2,39 +2,85 @@
 import Layout from '../layouts/Layout.astro';
 import { getNotionItems, getNotionProperties } from '../utils';
 
-const notionItems = await getNotionItems({
+/* const notionItems = await getNotionItems({
+	auth: import.meta.env.NOTION_API_KEY
+}); */
+
+const notionRecipe = await getNotionProperties({
 	auth: import.meta.env.NOTION_API_KEY
 });
 
-const notionRecipe = await getNotionProperties({
-	auth: import.meta.env.NOTION_API_KEY,
-});
-
-const items = await Promise.all(
+/* const items = await Promise.all(
 	notionItems.map(async ({ properties } : any) => {
 		const title = properties.Title.title[0].plain_text;
 		return {title};
 	})
-);
+); */
 
 const recipe = await Promise.all(
-	notionRecipe.map(async ({ properties } : any) => {
-		console.log("recipe",properties);
-		const title = properties.Title.title[0].plain_text;
+	notionRecipe.map(async ({ properties }: any) => {
+		/* 		console.log("recipe",properties.Description); */
+		let title = '';
+		let img = '';
+		let description = '';
+		if (properties.Picture.files[0]) {
+			img = properties.Picture.files[0].file.url || '';
+		}
+		if (properties.Title.title[0]) {
+			title = properties.Title.title[0].plain_text || '';
+		}
+		if (properties.Description.rich_text[0]) {
+			description = properties.Description.rich_text[0].plain_text || '';
+		}
 		const isAvailable = properties.Available.checkbox;
-		return {title, isAvailable}
+		const price = properties.Price.number;
+		return { img, title, isAvailable, price, description };
 	})
-)
+);
 ---
 
-<Layout title="Welcome to Astro.">
-	<main>
-		<div>
+<Layout title="AstroMenu">
+	<main class="w-full">
+		<div class="flex flex-row flex-wrap gap-2">
 			{
 				recipe.map((item) => (
-					<div>
-						<p>Title is: {item?.title}</p>
-						<p>Is Available: {item?.isAvailable}</p>
+					<div class="flex min-w-[18rem] flex-1 flex-col items-center justify-center gap-2 rounded-xl border border-gray-700 bg-gray-800 p-6">
+						<div class="flex h-[200px] w-[200px] items-center justify-center rounded-xl bg-white">
+							{item.img !== '' ? (
+								<img src={item?.img} alt="" width={200} height={200} />
+							) : (
+								<img src="/salad.webp" alt="" width={150} height={150} />
+							)}
+						</div>
+						<div>
+							<h4 class="mb-2 flex text-2xl font-bold text-gray-100">
+								{item?.title !== '' ? item?.title : 'N/A'}
+							</h4>
+							{item?.description !== '' && (
+								<p class="text-md my-2 text-gray-400">{item?.description}</p>
+							)}
+							<div>
+								{item?.isAvailable ? (
+									<div class=" my-2 flex w-min flex-row items-center gap-2 rounded-xl bg-green-300 p-1 px-2 text-xs">
+										<div class="h-[5px] w-[5px] rounded-full bg-green-500" />
+										<p class="text-gray-800">Available</p>
+									</div>
+								) : (
+									<div class=" my-2 flex w-max flex-row items-center gap-2 rounded-xl bg-red-300 p-1 px-2 text-xs">
+										<div class="h-[5px] w-[5px] rounded-full bg-red-500" />
+										<p class="text-gray-800">Not Available</p>
+									</div>
+								)}
+							</div>
+							<p class="text-md text-amber-400">
+								{item?.price
+									? item?.price.toLocaleString('en-US', {
+											style: 'currency',
+											currency: 'USD'
+									  })
+									: 'N/A'}
+							</p>
+						</div>
 					</div>
 				))
 			}
